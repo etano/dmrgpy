@@ -1,0 +1,125 @@
+@article{springerlink:10.1007/BF01341708,
+  author = {Bethe, H.},
+  affiliation = {Rom},
+  title = {Zur Theorie der Metalle},
+  journal = {Zeitschrift für Physik A Hadrons and Nuclei},
+  publisher = {Springer Berlin / Heidelberg},
+  issn = {0939-7922},
+  keyword = {Physics and Astronomy},
+  pages = {205-226},
+  volume = {71},
+  issue = {3},
+  url = {http://dx.doi.org/10.1007/BF01341708},
+  note = {10.1007/BF01341708},
+  year = {1931}
+}
+
+@article{RevModPhys.55.583,
+  journal = {Rev. Mod. Phys.},
+  month = {Jul},
+  doi = {10.1103/RevModPhys.55.583},
+  issue = {3},
+  author = {Wilson, Kenneth G.},
+  title = {The renormalization group and critical phenomena},
+  year = {1983},
+  url = {http://link.aps.org/doi/10.1103/RevModPhys.55.583},
+  publisher = {American Physical Society},
+  pages = {583--600},
+  volume = {55}
+}
+
+@article{RevModPhys.82.277,
+  journal = {Rev. Mod. Phys.},
+  month = {Feb},
+  doi = {10.1103/RevModPhys.82.277},
+  issue = {1},
+  author = {Eisert, J. and Cramer, M. and Plenio, M. B.},
+  title = {\textit{Colloquium}      : Area laws for the entanglement entropy},
+  year = {2010},
+  url = {http://link.aps.org/doi/10.1103/RevModPhys.82.277},
+  publisher = {American Physical Society},
+  pages = {277--306},
+  volume = {82}
+}
+
+@ARTICLE{2004JSMTE..06..002C,
+   author = {{Calabrese}, P. and {Cardy}, J.},
+    title = "{Entanglement entropy and quantum field theory}",
+  journal = {Journal of Statistical Mechanics: Theory and Experiment},
+   eprint = {arXiv:hep-th/0405152},
+ keywords = {05.70.Jk 11.25.Hf 03.67-a 65.40.Gr conformal field theory integrable spin chains (vertex models) entanglement in extended quantum systems (theory) quantum phase transitions (theory) new applications of statistical mechanics},
+     year = 2004,
+    month = jun,
+   volume = 6,
+    pages = {2},
+      doi = {10.1088/1742-5468/2004/06/P06002},
+   adsurl = {http://adsabs.harvard.edu/abs/2004JSMTE..06..002C},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@article{PhysRevLett.69.2863,
+  title = {Density matrix formulation for quantum renormalization groups},
+  month = {Nov},
+  doi = {10.1103/PhysRevLett.69.2863},
+  author = {White, Steven R.},
+  year = {1992},
+  issue = {19},
+  url = {http://link.aps.org/doi/10.1103/PhysRevLett.69.2863},
+  journal = {Phys. Rev. Lett.},
+  publisher = {American Physical Society},
+  pages = {2863--2866},
+  volume = {69}
+}
+
+@article{PhysRevLett.93.207204,
+  title = {Matrix Product Density Operators: Simulation of Finite-Temperature and Dissipative Systems},
+  month = {Nov},
+  doi = {10.1103/PhysRevLett.93.207204},
+  author = {Verstraete, F. and Garcia Ripoll, J. J. and Cirac, J. I.},
+  year = {2004},
+  issue = {20},
+  url = {http://link.aps.org/doi/10.1103/PhysRevLett.93.207204},
+  numpages = {4},
+  journal = {Phys. Rev. Lett.},
+  publisher = {American Physical Society},
+  pages = {207204},
+  volume = {93}
+}
+
+@ARTICLE{2011AnPhy.326...96S,
+   author = {{Schollw{\"o}ck}, U.},
+    title = {The density-matrix renormalization group in the age of matrix product states},
+  journal = {Annals of Physics},
+archivePrefix = "arXiv",
+   eprint = {1008.3477},
+ primaryClass = "cond-mat.str-el",
+     year = 2011,
+    month = jan,
+   volume = 326,
+    pages = {96-192},
+      doi = {10.1016/j.aop.2010.09.012},
+   adsurl = {http://adsabs.harvard.edu/abs/2011AnPhy.326...96S},
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+@misc{wiki:DMRG,
+  author = "Wikipedia",
+  title = "DMRG --- {W}ikipedia{,} The Free Encyclopedia",
+  year = "2011",
+  url = "\url{http://en.wikipedia.org/wiki/Density_matrix_renormalization_group}",
+  note = "[Online; accessed 04-December-2011]"
+}
+
+@article{RevModPhys.77.259,
+  journal = {Rev. Mod. Phys.},
+  month = {Apr},
+  doi = {10.1103/RevModPhys.77.259},
+  issue = {1},
+  author = {Schollw\"ock, U.},
+  title = {The density-matrix renormalization group},
+  year = {2005},
+  url = {http://link.aps.org/doi/10.1103/RevModPhys.77.259},
+  publisher = {American Physical Society},
+  pages = {259--315},
+  volume = {77}
+}

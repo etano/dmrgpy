@@ -1,0 +1,18 @@
+\tocdepth@munge 
+\contentsline {section}{\numberline {}Contents}{1}{}
+\tocdepth@restore 
+\contentsline {section}{\numberline {I}Introduction}{2}{}
+\contentsline {subsection}{\numberline {A}Heisenberg Model}{2}{}
+\contentsline {subsection}{\numberline {B}Numerical Renormalization Group}{3}{}
+\contentsline {subsection}{\numberline {C}Density Matrix Renormalization Group}{3}{}
+\contentsline {subsubsection}{\numberline {1}Infinite System DMRG}{4}{}
+\contentsline {subsubsection}{\numberline {2}Finite System DMRG}{5}{}
+\contentsline {section}{\numberline {II}Implementation}{6}{}
+\contentsline {section}{\numberline {III}Measurements}{7}{}
+\contentsline {section}{\numberline {IV}Results}{7}{}
+\contentsline {subsection}{\numberline {A}Truncation Error}{7}{}
+\contentsline {subsection}{\numberline {B}Energy}{7}{}
+\contentsline {subsection}{\numberline {C}Local Bond Strength}{9}{}
+\contentsline {subsection}{\numberline {D}Entanglement Entropy}{9}{}
+\contentsline {section}{\numberline {V}Possible Extensions}{10}{}
+\contentsline {section}{\numberline {}References}{11}{}

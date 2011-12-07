@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+
+\bibitem{springerlink:10.1007/BF01341708}
+H.~Bethe.
+\newblock Zur theorie der metalle.
+\newblock {\em Zeitschrift für Physik A Hadrons and Nuclei}, 71:205--226,
+  1931.
+\newblock 10.1007/BF01341708.
+
+\bibitem{2004JSMTE..06..002C}
+P.~{Calabrese} and J.~{Cardy}.
+\newblock {Entanglement entropy and quantum field theory}.
+\newblock {\em Journal of Statistical Mechanics: Theory and Experiment}, 6:2,
+  June 2004.
+
+\bibitem{RevModPhys.82.277}
+J.~Eisert, M.~Cramer, and M.~B. Plenio.
+\newblock \textit{Colloquium} : Area laws for the entanglement entropy.
+\newblock {\em Rev. Mod. Phys.}, 82:277--306, Feb 2010.
+
+\bibitem{RevModPhys.77.259}
+U.~Schollw\"ock.
+\newblock The density-matrix renormalization group.
+\newblock {\em Rev. Mod. Phys.}, 77:259--315, Apr 2005.
+
+\bibitem{2011AnPhy.326...96S}
+U.~{Schollw{\"o}ck}.
+\newblock The density-matrix renormalization group in the age of matrix product
+  states.
+\newblock {\em Annals of Physics}, 326:96--192, January 2011.
+
+\bibitem{PhysRevLett.93.207204}
+F.~Verstraete, J.~J. Garcia~Ripoll, and J.~I. Cirac.
+\newblock Matrix product density operators: Simulation of finite-temperature
+  and dissipative systems.
+\newblock {\em Phys. Rev. Lett.}, 93:207204, Nov 2004.
+
+\bibitem{PhysRevLett.69.2863}
+Steven~R. White.
+\newblock Density matrix formulation for quantum renormalization groups.
+\newblock {\em Phys. Rev. Lett.}, 69:2863--2866, Nov 1992.
+
+\bibitem{RevModPhys.55.583}
+Kenneth~G. Wilson.
+\newblock The renormalization group and critical phenomena.
+\newblock {\em Rev. Mod. Phys.}, 55:583--600, Jul 1983.
+
+\end{thebibliography}

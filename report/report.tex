@@ -1,0 +1,292 @@
+%\documentclass[11pt]{article} 
+\documentclass[aps,prb,10pt,superscriptaddress,onecolumn,amsmath,amssymb,floatfix,eqsecnum,nofootinbib]{revtex4} 
+%\documentclass[10pt]{elsart}%elsevier documentclass 
+%\documentclass[aps,prb,onecolumn,amsmath,amssymb,floatfix,eqsecnum,superscriptaddress,12pt,nofootinbib]{revtex4} 
+%\documentclass[aps,prl,twocolumn,amsmath,amssymb,floatfix]{revtex4} 
+%\documentclass[aps,twocolumn,eqsecnum,amsmath,amssymb,floatfix]{revtex4} 
+%\usepackage{epsfig,psfrag,subfigure} 
+\usepackage{graphicx,psfrag,subfigure,url} 
+\setlength{\textwidth}{16truecm} 
+\setlength{\oddsidemargin}{0truecm} 
+\setlength{\evensidemargin}{\oddsidemargin} 
+\setlength{\textheight}{23truecm} 
+\setlength{\topmargin}{-1.5truecm} 
+\setlength{\headheight}{0truecm} \jot 3ex 
+\renewcommand{\baselinestretch}{0.95} 
+\addtolength{\oddsidemargin}{-15pt} 
+\addtolength{\textwidth}{30pt} 
+\linespread{1.5}
+ 
+\usepackage{graphicx} 
+\usepackage{psfrag} 
+\usepackage{amsmath,amssymb} 
+\usepackage{colordvi} 
+%\bibliographystyle{unsrt} 
+%\usepackage{natbib} 
+%\bibliographystyle{elsart-num.bst} 
+%\bibliographystyle{elsart-harv.bst} 
+
+% BEAMER STUFF
+%\documentclass{beamer}
+%\usetheme[secheader]{Boadilla}
+%\usecolortheme{seahorse}
+%\usepackage[latin1]{inputenc}
+
+\begin{document}
+
+\title{Density Matrix Renormalization Group}
+\author{Ethan W. Brown}
+\email{brown122@illinois.edu} 
+\affiliation{Department of Physics, University of Illinois at Urbana-Champaign, 1110 
+W.\ Green St.\ , Urbana, IL  61801-3080, USA} 
+%\institute[2011]{UIUC}
+\date{\today}
+
+\begin{abstract}
+Since Steve White's origial paper in 1992 \cite{PhysRevLett.69.2863}, the density matrix renormalization group (DMRG) has risen to be the gold standard for exact numerical treament of many-body problems in low dimensions. Though the method was first used only for ground state structures in 1D, it has recently been extended to study systems in real-time \cite{2011AnPhy.326...96S}, at finite temperature \cite{PhysRevLett.93.207204}, and with higher dimensionality \cite{2011AnPhy.326...96S}. Much of this success is owed to the deep connection of the method with wavefunctions formed from matrix product states (MPS), and more recently tensor product states (TPS). In this report we will outline previous numerical renormalization group procedures and point out their shortcomings. We will then continue by introducing the density matrix renormalization group procedure, explaining why its works, and implement it specifically for the spin-1/2 Heisenberg hamiltonian.
+\end{abstract}
+
+\maketitle
+\tableofcontents
+\clearpage
+
+\section{Introduction}
+
+Many of the most interesting problems in contemporary condensed matter physics concern strongly-interacting low-dimensional systems, e.g. quantum spin chains, frustrated magnets, ultra-cold atomic gases, and models of high-temperature superconductivity \cite{2011AnPhy.326...96S}. However, because of the dominating effects of correlation, these systems escape a systematic pertubative treatment. Very few exact analytical solutions exist (e.g. the Bethe ansatz \cite{springerlink:10.1007/BF01341708}), necessitating the use of strictly non-pertubative analytical and numerical techniques. Furthermore, though it is possible to formulate such problems field theoretically, ultimately numerical methods must be used to calculate any observables. Such methods include exact diagonalization, quantum Monte Carlo, and various resummation techniques. Today, the defacto method of choice for one-dimensional lattices is Steve White's Density Matrix Renormalization Group (DMRG) \cite{PhysRevLett.69.2863}. In the following we aim to give a broad introduction to DMRG, specifically through the lens of the $1D$ Heisenberg model.
+
+\subsection{Heisenberg Model}
+
+As a brief aside we introduce the Heisenberg model as a reference hamiltonian for $1D$ interacting systems. It is represented by the hamiltonian,
+\begin{equation}
+  H = J \sum_{<i,j>} S_{i} S_{j}
+\end{equation}
+where $J$ is the interstitial coupling and $S_{i}$ is a spin operator. For the following we will consider the case of finite-chains of spin-1/2 sites with only nearest neighbor interactions. This makes our hamiltonian,
+\begin{equation}\label{heis}
+  H = \sum_{i}^{N} S_{i} S_{i+1} = \sum_{i}^{N} S_{i}^{z} S_{i+1}^{z} + \frac{1}{2} (S_{i}^{+} S_{i+1}^{-} + S_{i}^{-} S_{i+1}^{+})
+\end{equation}
+with each $S_{i}^{a}$ given by the spin-1/2 representation of the Pauli spin matrices,
+\begin{equation}
+  S_{i}^{z} = \left(\begin{matrix} 1/2 & 0 \\ 0 & -1/2 \end{matrix} \right), S_{i}^{+} = \left(\begin{matrix} 0 & 1 \\ 0 & 0 \end{matrix} \right), S_{i}^{-} = \left(\begin{matrix} 0 & 0 \\ 1 & 0 \end{matrix} \right)
+\end{equation}
+Notice also that for the remainder of the discussion we will, without loss of generality, let $J = 1$. This will turn the model antiferromagnetic in that for $ J > 0 $ spins on neighboring sites will tend to oppositely align in order to lower their energy. Classically this system prefers the alternating spin N\'{e}el state ($\uparrow \downarrow \uparrow \downarrow$). However, as we shall see, quantum fluctuations (magnons) drive the system to prefer alternating singlet bonds. The $1D$ antiferromagnetic Heisenberg hamiltonian in this form was solved exactly by Hans Bethe in 1931 \cite{springerlink:10.1007/BF01341708}, giving an energy of,
+\begin{equation}\label{heisE0}
+  \frac{E_{0}}{N} = \frac{1}{4} - \log{2} \approx -0.443147
+\end{equation}
+Throughout the proceeding discussion, we will make references back to this hamiltonian in order to better understand the renormalization procedure.
+
+\subsection{Numerical Renormalization Group}
+
+We begin with a quick review of previous numerical renormalization group procedures \cite{RevModPhys.55.583}. The general goal is to use block decimation to boil the system down to its most essential degrees of freedom. To do so, we systematically combine block states and operators and project out the $m$ states which have the largest eigenvalues in the combined block Hilbert space. For example consider a system consisting of two blocks $B$ and $B'$ in the $1D$ Heisenberg model, with respective Hilbert space dimension $d_{B}$ and $d_{B'}$. If we wish to combine block $B$ with its neighbor $B'$, we form the hamiltonian,
+\begin{equation}
+  [H_{BB'}]_{i_{1},i_{2},i_{1}',i_{2}'} = [H_{B}]_{i_{1},i_{1}'} \delta_{i_{2},i_{2}'} + \delta_{i_{2},i_{2}'} [H_{B'}] + [S_{r}^{a}]_{i_{1},i_{1}'} [S_{l}^{a'}]_{i_{2},i_{2'}}
+\end{equation}
+which has dimension $d_{B} d_{B'}$ by $d_{B} d_{B'}$ and where $S_{r/l}^{a}$ represents the spin operator for the rightmost/leftmost site of each block. We then diagonalize $H_{BB'}$, pick out the $m$ eigenstates which account for the $m$ largest eigenvalues, and replace our old block $B$ with $BB'$. At this point, new sites are added to the system and the decimation procedure is continued, always reducing down to a single superblock. This algorithm allows one to avoid the exponential growth in Hilbert space with system size (e.g. $2^{L}$ for a spin-1/2 chain of L sites). Instead, each block is always restricted to an $m$ by $m$ Hilbert space allowing efficient calculation of properties normally only attainable through exact diagonalization.
+
+Though this method seems reasonable at first, it has seen limited success. The issue is that each block hamiltonian $H_{BB'}$ is isolated from the rest of the system, making the block ends wildly innaccurate. This error can be improved by choosing the truncated states using clever boundary conditions. However, this in general is not a trivial task. Another route for improvement comes from first forming a superblock of three or more blocks, diagonalizing, and then projecting the best $m$ of these states onto $H_{BB'}$. However, again choosing states of this hamiltonian is not trivial, and in general eigenstates of the superblock hamiltonian are not the most probable states of each block.
+
+\subsection{Density Matrix Renormalization Group}
+
+To overcome this apparent difficulty, White had the insight to instead choose eigenstates from the density matrix formed by the ground state of the superblock hamiltonian \cite{PhysRevLett.69.2863}. This improvement can see in two lights. First, one could imagine a system coupled to a heat bath or some other system in the outside universe. Then eigenvalues of the density matrix are given by their Boltzmann weight $e^{-\beta E_{i}}$, with the largest eigenvalue corresponding to the lowest energy. Thus it is natural to assume the largest eigenstates correspond to the most probable eigenstates of the system. Typically, however, there is no heat bath, and the density matrix is given by
+\begin{equation}\label{rho}
+  \rho(i,i') = \sum_{j} \psi(ij) \psi(i'j)
+\end{equation}
+With this definition, we can motivate the choice of states through a linear algebraic argument. Ideally, we would like to minimize $||\psi_{true} - \psi_{trunc}||_{2}$ where $\psi_{true}$ is the true ground state and $\psi_{trunc}$ is its projection onto a truncated basis of $m$ density matrix eigenstates. In general,
+\begin{equation}
+  \psi_{trunc} = \sum_{\alpha,j} a_{\alpha,j} |u^{\alpha}\rangle |j\rangle
+\end{equation}
+where $u^{\alpha}$ are the $m$ eigenstates of the truncated basis and $j$ are the eigenstates of the true basis. If we perform a singular value decomposition of the matrix $\Psi$ formed from the wavefunction coefficients of $\psi_{true} = UDV^{T}$, we find $\rho = UD^{2}U^{T}$. Thus the eigenstates (with eigenvalues $w_{\alpha}$) of $\rho$, are the precise ones which minimize the 2-norm distance given above. In general the error of the DMRG algorithm, given $m$, will be
+\begin{equation}
+  \epsilon = 1 - \sum_{\alpha} w_{\alpha}
+\end{equation}
+which for many applications will be close to zero.
+
+\subsubsection{Infinite System DMRG}
+
+There are now two ways in which to formulate the DMRG procedure. First, if one wishes to compute properties of the infinite chain, one should use the below algorithm. Note that the procedure begins with four single sites, and then continues by absorbing the two sites in the middle into the outer blocks and inserting a new set of two sites back between the blocks (see fig. \ref{fig:infinite}).
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.3\textwidth]{infinite.png}
+  \caption{Graphical representation of the infinite system DMRG algorithm \cite{RevModPhys.77.259}.}
+  \label{fig:infinite}
+\end{figure}
+
+\begin{enumerate}
+  \item Set up matrix representations of each block Hamiltonian and other operators, $H^{B}, S_{i}^{a}, a = z, +, -$. Typically one begins will four single sites represented by basis sets $(i_{1}, i_{2}, i_{3}, i_{4})$.
+  \item Form the superblock Hamiltonian in sparse form.
+  \item Using a sparse matrix solver (e.g. the Lanczos algorithm), diagonalize the superblock Hamiltonian to find the ground state $\psi(i_{1}, i_{2}, i_{3}, i_{4})$. All observables may be measured at this time using $\psi$.
+  \item Form the reduced density matrix for the two-block $1-2$ , namely $B\bullet$, by integrating out the degrees of freedom from the other two-block $3-4$.
+  \begin{equation}
+    \rho(i_{1},i_{2},i_{1}',i_{2}') = \sum_{i_{3},i_{4}} \psi(i_{1}, i_{2}, i_{3}, i_{4}) \psi(i_{1}', i_{2}', i_{3}, i_{4})
+  \end{equation}
+  If preferred, observables may be measured now using,
+  \begin{equation}
+    \langle \mathcal{O} \rangle = Tr(\rho \mathcal{O})
+  \end{equation}
+  \item Diagonalize $\rho$ to find the set of eigenvalues $w_{\alpha}$ and eigenvectors $u_{i_{1},i_{2}}^{\alpha}$. Discard all but the largest m, eigenvalues and associated eigenvectors.
+  \item Form the matrix representation of the operators for the two-block $1-2$. For the Hamiltonian of eq. \ref{heis} one has,
+  \begin{equation}
+    [H_{B\bullet}]_{i_{1},i_{2},i_{1}',i_{2}'} = [H_{B\bullet}]_{i_{1},i_{1}'} \delta_{i_{2},i_{2}'} + [S_{r}^{a}]_{i_{1},i_{1}'} S_{i_{2},i_{2'}}^{a'}
+  \end{equation}
+  and for the rightmost site in block $1$,
+  \begin{equation}
+    [S_{r\bullet}^{a}]_{i_{1},i_{2},i_{1}',i_{2}'} = \delta_{i_{1},i_{1}'} S_{i_{2},i_{2'}}^{a}
+  \end{equation}
+  \item Form the new $B'$ by projecting out the $m$ states. The new operators are given by,
+  \begin{equation}
+    H_{B'} = T H_{B\bullet} T^{\dagger}, S_{r}'^{a} = T S_{r\bullet}^{a} T^{\dagger}
+  \end{equation}
+  where $T$ is the $m$ by $2m$ matrix formed by the first $m$ eigenstates of $u_{i_{1},i_{2}}^{\alpha}$.
+  \item Replace the old block 1 with new block 1.
+  \item Replace the old block 4 by the reflection of the new block 1
+  \item Go to step 2
+\end{enumerate}
+
+\subsubsection{Finite System DMRG}
+
+The above algorithm is typically only converged for the simplest of observables. Thus it is often advantageous to perform the following finite system DMRG once a specified length $L$ is reached. To do so, one grows one block at the expense of the other. This continues until the end of the spin chain is reached, at which point the process reverses. One then sweeps back and forth until the observable of interest converges within a specified error (see fig. \ref{fig:finite}). This procedure is outlined below:
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.4\textwidth]{finite.png}
+  \caption{Graphical representation of the finite system DMRG algorithm \cite{RevModPhys.77.259}.}
+  \label{fig:finite}
+\end{figure}
+
+\begin{enumerate}
+  \item Use the infinite system method for $L/2 - 1$ steps to build up to $L$ sites. Along the way, store the block Hamiltonian $H_{B_{l}}$ and each end block operator $S_{r_{l}}^{a}$, where $l = 1,2,\dots,L/2$.
+  \item At $l = L/2$. Set block 1 to $B_{l}$ and block 4 to $B_{L-l-2}^{R}$.
+  \item Do steps 2-8 of the infinite system method.
+  \item Store the new block 1 as $B_{l+1}$, replacing the old $B_{l+1}$.
+  \item Replace the old block 4 with $B_{L-l-2}^{R}$.
+  \item If $l < L-3$, go to step 3 with $l = l+1$. Otherwise, set $l=1$ and continue.
+  \item Form the superblock $B_{L-l-2} \bullet \bullet B_{l}^{R}$.
+  \item Do steps 2-8 of the infinite system method, only this time making sure to integrate out the degrees of freedom from blocks $1, 2$ when forming $\rho$.
+  \item Store the new block 4 as $B_{l+1}^{R}$, replacing the old $B_{l+1}^{R}$
+  \item Replace the old block 1 with $B_{L-l-2}^{R}$.
+  \item If $l < L-3$, go to step 7 with $l = l+1$. Otherwise, set $l=1$, form superblock $B_{l} \bullet \bullet B_{L-l-2}^{R}$, and go to step 3.
+\end{enumerate}
+
+\section{Implementation}
+
+In order to implement the above procedures, I chose to leverage the existing libraries of Numpy and Scipy in the Python language \cite{}. These include sparse matrix libraries, which are essential when building large hermitian matrices with only nearest neighbor interactions. Furthermore, Scipy comes packaged with a sparse Lanczos solver \emph{eigsh}, which allows quick computation of the ground state of the superblock hamiltonian. I found in general, the default number of Lanczos iterations ($\sim 600$) to be satisfactory for projecting out an accurate ground state. For larger systems or systems which include longer range iteractions, this value may need to be increased.
+
+For all calculations, I employed the use of open boundary conditions. DMRG is one of the only methods for which this assumption improves convergence speed. If one did apply periodic boundary conditions, it would be necessary to reorder the block-site-site-block system ($B \bullet \bullet B$) to block-site-block-site ($B \bullet B \bullet$) in order to avoid any block-block interaction would have a much larger Hilbert space. For further implementation questions, it is instructive to read through the attached code (dmrg.py) which is both readable (due to python's syntax) and well commented.
+
+\section{Measurements}
+
+Before quoting results, it is important to point out how measurements are made during the DRMG iteration. First, if one wishes to compute a total energy, it is simplest to use the lowest eigenvalue coming from the diagonalization of the superblock hamiltonian. However, one may also get an estimate of $\langle H \rangle$ by using the expectation values of each correlator,
+\begin{equation}
+  \langle H \rangle = \sum_{i}^{L} \langle S_{i}^{a} S_{i+1}^{a'} \rangle
+\end{equation}
+To find these correlators, one must be careful to observe which block to which site $i$ and $j$ belong. If $i$ and $j$ are on different blocks (e.g. blocks 1 and 2), one may simply use,
+\begin{equation}
+  \langle S_{i}^{a} S_{j}^{a'} \rangle = \sum_{i_{1},i_{2},i_{3},i_{4},i_{1}',i_{2}'} \psi_{i_{1}, i_{2}, i_{3}, i_{4}} [S_{i}^{a}]_{i_{1},i_{1}'} [S_{j}^{a'}]_{i_{2},i_{2}'} \psi_{i_{1}', i_{2}', i_{3}, i_{4}}
+\end{equation}
+However if sites $i$ and $j$ are on the \emph{same} block, one must have stored all previous values of $S_{i}^{a} S_{j}^{a'}$ in the basis of that block (e.g. block 1),
+\begin{equation}
+  \langle S_{i}^{a} S_{j}^{a'} \rangle = \sum_{i_{1},i_{2},i_{3},i_{4},i_{1}'} \psi_{i_{1}, i_{2}, i_{3}, i_{4}} [S_{i}^{a} S_{j}^{a'}]_{i_{1},i_{1}'} \psi_{i_{1}', i_{2}, i_{3}, i_{4}}
+\end{equation}
+Because of this, I found it most efficient to look only at correlators between different blocks, and store only each on-site spin operator $S_{i}^{a}$. Measurements of other quantuties which do not involve correlators may be computed simply using the basis of the block in which they reside,
+\begin{equation}
+  \langle S_{i}^{a} \rangle = \sum_{i_{1},i_{2},i_{3},i_{4},i_{1}'} \psi_{i_{1}, i_{2}, i_{3}, i_{4}} [S_{i}^{a}]_{i_{1},i_{1}'} \psi_{i_{1}', i_{2}, i_{3}, i_{4}}
+\end{equation}
+
+\section{Results}
+
+\subsection{Truncation Error}
+
+It is clear from its formulation, that tuning $m$ is the true way to attain more precision results. Thus as a first look at how well the method performs we plot the error arising from the truncation to $m$ states. (see fig. \ref{truncerr})
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.7\textwidth]{../plots/errE-10.png}
+  \caption{A plot of the relative truncation error vs. number of included eigenstates for a system with $L=10$. The exact result was computed via exact diagonalization for comparison.}
+  \label{truncerr}
+\end{figure}
+
+\subsection{Energy}
+
+Here we compare convergence to the exact ground state energy given by eq. \ref{heisE0}. One can see that convergence does not improve too greatly for increasing $m > 32$. This implies that the renormalization procedure truely is picking out the most important states for $L=100$. Also note that each one of these lines (even $m=4$) would eventually converge to eq. \ref{heisE0} in the limit $L \rightarrow \infty$. (see fig. \ref{E-100})
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.7\textwidth]{../plots/E-100.png}
+  \caption{Convergence of the energy per site with increasing $L$ for several values of $m$. Little improvement is seen past $m=16$, though all results eventually converge to the exact answer in the limit $L \rightarrow \infty$}
+  \label{E-100}
+\end{figure}
+
+\subsection{Local Bond Strength}
+
+To gain understanding into how the boundary conditions play a role in the simulation we plot the local bond strength, $\langle S_{i}S_{i+1} \rangle$ for each site, as it converges with $m$. As one can see, this quantity converges slower than the total energy. Furthermore the strong alternation with slow decay is clearly a boundary effect. Quantum mechanically the ground state of the Heisenberg model prefers to alternate between two states: having singlet bonds at every even site with no bonds at every odd site and having singlet bonds at every odd site with no bonds on every even site. This configuration is much preferred over the classical antiferromagnetic ground state (the N\'{e}el state). Since we are choosing a system in which $L$ is even, the only way the end sites may affect the system is by developing strong singlet bonds with their neighbors. Note, however, this boundary effect does not affect the convergence of other observables. (see fig. \ref{SiSj-100})
+
+%\begin{figure}
+%  \centering
+%  \includegraphics[width =.7\textwidth]{../plots/SiSj-10.png}
+%  \caption{Local Bond Strength for a system with $L=10$ for several values of $m$.}
+%  \label{SiSj-10}
+%\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.7\textwidth]{../plots/SiSj-100.png}
+  \caption{Local Bond Strength for a system with $L=100$ for several values of $m$.}
+  \label{SiSj-100}
+\end{figure}
+
+%\subsection{Local Magnetization}
+%
+%\begin{figure}[hp]
+%  \centering
+%  \includegraphics[width =.6\textwidth]{../plots/Si-10.png}
+%  \label{Si-10}
+%  \caption{}
+%\end{figure}
+%
+%\begin{figure}[hp]
+%  \centering
+%  \includegraphics[width =.6\textwidth]{../plots/Si-100.png}
+%  \label{Si-100}
+%  \caption{}
+%\end{figure}
+
+\subsection{Entanglement Entropy}
+
+A final quantity of interest, especially in recent years, is the Von Neumann entanglement entropy\cite{RevModPhys.82.277},
+\begin{equation}
+  S_{VN}^{A} = Tr(\rho_{A} \log(\rho{A}))
+\end{equation}
+Here, $\rho_{A}$ is the reduced density matrix of subsystem $A$, where degrees of freedom outside of $A$ have been integrated out. This is precisely the definition we used for our block density matrices in eq. \ref{rho}, making the entanglement entropy trivial to attain in DMRG. In general $S_{VN}^{A}$ is a measure of how much subsystem $A$ knows about the rest of the system and visa versa. Though first used in the study of black holes, conformal field theorists have successfully applied this quantity to describe several different lattice systems, including the $1D$ Heisenberg model. Their predicition for the entanglement entropy for the $1D$ Heisenberg model is given by,
+\begin{equation}
+  S_{VN}(x) = \frac{c}{6} \log(x') + \log(g) + S_{1}/2
+\end{equation}
+where $x' = \frac{2L}{\pi} \sin{\frac{\pi x}{L}}$ and $g$ is local metric \cite{2004JSMTE..06..002C}. With this in mind, we plot our values for the entanglement entropy and extract the conformal charge, $c=1$. For an in depth discussion of what this quantity means, please see the review paper by Calabrese and Cardy \cite{2004JSMTE..06..002C}. (see fig. \ref{Svn-100} and fig. \ref{Svnp-100})
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.7\textwidth]{../plots/Svn-100.png}
+  \caption{Von Neumann entanglement entropy for a system with 100 sites. Here $x$ is the number of sites in the block. Note as expected the sites in the center of the lattice are maximally entangled, while those on the boundary know the least about the rest of the system. For the 100 site lattice, $S_{VN}$ converges for $m > 32$.}
+  \label{Svn-100}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width =.7\textwidth]{../plots/Svnp-100.png}
+  \caption{Von Neumann entanglement entropy for a system with 100 sites. Here $x'$ is the scaled valued given above. From this plot with $m=64$, we read off slope of the bottom (for reasons discussed elsewhere \cite{2004JSMTE..06..002C}) the to determine the conformal charge, $c=1$.}
+  \label{Svnp-100}
+\end{figure}
+
+\section{Possible Extensions}
+
+The above work gives only a basic account of what is possible with DMRG. A very simple extension would be the inclusion of low-lying excited states. Then instead of computing only the ground state wavefunction from the superblock, several eigen-pairs would be kept from the Lanczos process. One would then form the density matrix as,
+\begin{equation}
+  \rho_{i,i'} = \sum_{k} W_{k} \sum_{j} \psi_{ij}^{k} \psi_{i'j}^{k}
+\end{equation}
+where each $W_{k}$ is a weighting function determined by the relative importance of the included state. In this way, DMRG may be extended to both finite temperature ($W_{k} = e^{-\beta E_{k}}$) or time-dependent ($W_{k} = e^{-it E_{k}}$) systems \cite{PhysRevLett.93.207204}.
+
+Another current route of DMRG research involves extension to higher dimensions ($D>1$). To do so, one may reformulate the DMRG algorithm in terms of Matrix Product States ($D=1$) or Tensor Product States ($D>1$). Unfortunately, a thorough discussion of these topics is outside the scope of this current project. If the reader is interested, all the above extensions are explained in great detail in the Schollw{\"o}ck's review article \cite{2011AnPhy.326...96S}.
+
+\bibliography{report}{}
+\bibliographystyle{plain}
+
+\end{document}
