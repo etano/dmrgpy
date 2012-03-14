@@ -1,11 +1,11 @@
 from math import *
 import sys
+import numpy as np
 import scipy
 from scipy.sparse import kron
 from scipy.sparse.linalg import eigsh
 from scipy.sparse import identity as I
 from numpy.linalg import eigh
-import numpy as np
 
 def TP(M):
   N = len(M)
@@ -17,9 +17,12 @@ def TP(M):
 def BuildSuperBlock(HB,SzB,SpB,SmB,HU,SzU,SpU,SmU,Sz,Sp,Sm):
   mB = HB.shape[0]
   mU = HU.shape[0]
-  HBB = I(mB*mU*2*2)
-  HBB = TP((HB,I(2*2*mU))) + TP((I(mB*2*2),HU)) + TP((SzB,Sz,I(2*mU))) + TP((I(mB),Sz,Sz,I(mU))) + TP((I(mB*2),Sz,SzU)) + 0.5*(TP((SpB,Sm,I(2*mU))) + TP((I(mB),Sp,Sm,I(mU))) + TP((I(mB*2),Sp,SmU)) + TP((SmB,Sp,I(2*mU))) + TP((I(mB),Sm,Sp,I(mU))) + TP((I(mB*2),Sm,SpU)))
-  return (mB,mU,HBB)
+  HBB = kron(HB,I(2)) + kron(SzB,Sz) + 0.5*(kron(SpB,Sm) + kron(SmB,Sp))
+  HLR = kron(Sz,Sz) + 0.5*(kron(Sp,Sm) + kron(Sm,Sp))
+  HBU = kron(I(2),HU) + kron(Sz,SzU) + 0.5*(kron(Sm,SpU) + kron(Sp,SmU))
+  HSB = kron(HBB,I(2*mU)) + kron(I(mB*2),HBU) + TP((I(mB),HLR,I(mU)))
+  #HBB = kron(HB,I(2*2*mU)) + kron(I(mB*2*2),HU) + TP((SzB,Sz,I(2*mU))) + TP((I(mB),Sz,Sz,I(mU))) + TP((I(mB*2),Sz,SzU)) + 0.5*(TP((SpB,Sm,I(2*mU))) + TP((I(mB),Sp,Sm,I(mU))) + TP((I(mB*2),Sp,SmU)) + TP((SmB,Sp,I(2*mU))) + TP((I(mB),Sm,Sp,I(mU))) + TP((I(mB*2),Sm,SpU)))
+  return (mB,mU,HSB)
 
 def FormRho(psi,mB,mU,LR):
   Psi = np.zeros((2*mB,2*mU))
@@ -156,6 +159,7 @@ def main():
   # Get Inputs
   L = int(sys.argv[1])
   m = int(sys.argv[2])
+  N = int(sys.argv[3])
 
   # Data File
   f = open('data/dmrg-'+str(L)+'-'+str(m),'w')
@@ -197,7 +201,6 @@ def main():
     Ops = RightDMRGAdd(f,Ops,Sz,Sp,Sm,m,l,L-l-4)
 
   # Finite DMRG Sweeps
-  N = 2
   for n in range(0,N):
 
     # Left DMRG Sweep
